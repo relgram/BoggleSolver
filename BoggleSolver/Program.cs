@@ -1,33 +1,53 @@
 ﻿using System.Diagnostics;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 
 namespace BoggleSolver;
 
 internal class Program
 {
+    //static void Main(string[] args)
+    //{
+    //    BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+    //}
+
     static void Main(string[] args)
     {
         var words = File.ReadAllLines("dictionary.txt");
         var boggle = new BoggleSolver(words);
 
-        var stopwatch3 = Stopwatch.StartNew();
-        var results3 = boggle.SolveBoard(3, 3, "oectammrn");
-        var elapsed3 = stopwatch3.Elapsed;
+        var stopwatch1 = Stopwatch.StartNew();
 
-        Console.WriteLine($"3x3 Solve Duration: {elapsed3}");
-        Console.WriteLine($"3x3 Found Words: {results3.Length}");
+        for (int i = 0; i < 1_000; ++i)
+        {
+            var results1 = boggle.SolveBoard(3, 3, "yoxrbaved");
+        }
 
-        var stopwatch4 = Stopwatch.StartNew();
-        var results4 = boggle.SolveBoard(4, 4, "oectammrnneersrt");
-        var elapsed4 = stopwatch4.Elapsed;
+        var elapsed1 = stopwatch1.Elapsed;
 
-        Console.WriteLine($"4x4 Solve Duration: {elapsed4}");
-        Console.WriteLine($"4x4 Found Words: {results4.Length}");
+        Console.WriteLine($"Duration: {elapsed1 / 1_000}");
+    }
+}
 
-        var stopwatch5 = Stopwatch.StartNew();
-        var results5 = boggle.SolveBoard(5, 5, "oectwammrnneaeersrtblprto");
-        var elapsed5 = stopwatch5.Elapsed;
+[SimpleJob(RuntimeMoniker.Net80, baseline: true)]
+[RPlotExporter]
+public class BoggleExperiment
+{
+    private BoggleSolver _boggleSolver;
 
-        Console.WriteLine($"5x5 Solve Duration: {elapsed5}");
-        Console.WriteLine($"5x5 Found Words: {results5.Length}");
+    [Params(1000, 10000)]
+    public int N;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        var words = File.ReadAllLines("dictionary.txt");
+        _boggleSolver = new BoggleSolver(words);
+    }
+
+    [Benchmark]
+    public void BoggleSolver()
+    {
+        _boggleSolver.SolveBoard(5, 5, "oectwammrnneaeersrtblprto");
     }
 }
