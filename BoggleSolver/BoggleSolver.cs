@@ -17,6 +17,45 @@ public sealed class BoggleSolver
         (-1, +1), (0, +1), (+1, +1)
     ];
 
+
+    /// <summary>
+    /// Class to represent the various chain of characters required to arrive
+    /// at a valid string provided to the Build method
+    /// </summary>
+    private sealed class Node(string? value = null)
+    {
+        public Node[] Edges { get; } = new Node[128];
+
+        public string? Value { get; } = value;
+
+        public Node Build(string[] words)
+        {
+            for (int i = 0; i < words.Length; ++i)
+            {
+                var node = this;
+
+                for (int x = 0; x < words[i].Length; ++x)
+                {
+                    if (node.Edges[words[i][x]] is null)
+                    {
+                        if (x == words[i].Length - 1)
+                        {
+                            node.Edges[words[i][x]] = new(words[i]);
+                        }
+                        else
+                        {
+                            node.Edges[words[i][x]] = new();
+                        }
+                    }
+
+                    node = node.Edges[words[i][x]];
+                }
+            }
+
+            return this;
+        }
+    }
+
     private readonly Node _rootNode;
 
     public BoggleSolver(string[] validWords)
@@ -33,7 +72,7 @@ public sealed class BoggleSolver
         // check to make sure we're not out of bounds and we havent been visited before
         if ((x >= 0) && (x < width) && (y >= 0) && (y < width) && (visited[x, y] == false))
         {
-            if (node.Edges.TryGetValue(board[x, y], out var edge) == true)
+            if (node.Edges[board[x, y]] is Node edge)
             {
                 if (edge.Value is not null)
                 {
@@ -75,51 +114,10 @@ public sealed class BoggleSolver
             {
                 bool[,] visited = new bool[width, height];
 
-                if (_rootNode.Edges.ContainsKey(board[x, y]) == true)
-                {
-                    Search(_rootNode, board, x, y, width, words, visited);
-                }
+                Search(_rootNode, board, x, y, width, words, visited);
             }
         }
 
         return [.. words];
-    }
-}
-
-/// <summary>
-/// Class to represent the various chain of characters required to arrive
-/// at a valid string provided to the Build method
-/// </summary>
-public sealed class Node(string? value = null)
-{
-    public Dictionary<char, Node> Edges { get; } = [];
-
-    public string? Value { get; } = value;
-
-    public Node Build(string[] words)
-    {
-        for (int i = 0; i < words.Length; ++i)
-        {
-            var node = this;
-
-            for (int x = 0; x < words[i].Length; ++x)
-            {
-                if (node.Edges.TryGetValue(words[i][x], out var edge) == false)
-                {
-                    if (x == words[i].Length - 1)
-                    {
-                        node.Edges[words[i][x]] = new(words[i]);
-                    }
-                    else
-                    {
-                        node.Edges[words[i][x]] = new();
-                    }
-                }
-
-                node = node.Edges[words[i][x]];
-            }
-        }
-
-        return this;
     }
 }

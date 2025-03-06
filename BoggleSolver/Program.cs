@@ -1,31 +1,14 @@
-﻿using System.Diagnostics;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Running;
 
 namespace BoggleSolver;
 
 internal class Program
 {
-    //static void Main(string[] args)
-    //{
-    //    BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
-    //}
-
     static void Main(string[] args)
     {
-        var words = File.ReadAllLines("dictionary.txt");
-        var boggle = new BoggleSolver(words);
-
-        var stopwatch1 = Stopwatch.StartNew();
-
-        for (int i = 0; i < 1_000; ++i)
-        {
-            var results1 = boggle.SolveBoard(3, 3, "yoxrbaved");
-        }
-
-        var elapsed1 = stopwatch1.Elapsed;
-
-        Console.WriteLine($"Duration: {elapsed1 / 1_000}");
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }
 
@@ -46,7 +29,7 @@ public class BoggleExperiment
     }
 
     [Benchmark]
-    public void BoggleSolver()
+    public void BoggleSolver1()
     {
         _boggleSolver.SolveBoard(5, 5, "oectwammrnneaeersrtblprto");
     }
